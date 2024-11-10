@@ -51,11 +51,11 @@ fps = 30
 clock = pygame.time.Clock()
 
 # Kamera- oder Videoquelle auswählen
-source = "webcam"  # Ändere auf "video" für eine Videodatei
+source = "video"  # Ändere auf "video" für eine Videodatei
 if source == "webcam":
     cap = cv2.VideoCapture(0)  # Webcam
 else:
-    cap = cv2.VideoCapture("Wand_Jacke_hell.mp4")  # Videodatei (Dateiname anpassen)
+    cap = cv2.VideoCapture("Wand_Jacke_dunkel.mp4")  # Videodatei (Dateiname anpassen)
 
 if not cap.isOpened():
     print("Fehler: Videoquelle konnte nicht geöffnet werden.")
@@ -101,22 +101,27 @@ while running:
     screen.blit(gameFrame, (0, 0))
 
     # Zeige die Foreground Mask an, um die Erkennung zu überprüfen
-    cv2.imshow("Foreground Mask", fg_mask)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+    # cv2.imshow("Foreground Mask", fg_mask)
+    # if cv2.waitKey(1) & 0xFF == ord('q'):
+    #     break
 
-    # Zeichne die Bounding Box, wenn eine erkannt wurde
+    # Zeichne die gespiegelte Bounding Box, wenn eine erkannt wurde
     if bbox:
         min_x, min_y, max_x, max_y = bbox
         print("Bounding Box:", bbox)  # Debugging-Ausgabe
 
-        # Zeichne die originale Bounding Box (ohne Rotation und Spiegelung)
-        pygame.draw.rect(screen, (255, 0, 0), (min_x, min_y, max_x - min_x, max_y - min_y), 2)
+        # Berechne gespiegelte Bounding Box-Koordinaten
+        screen_width = screen.get_width()
+        mirrored_min_x = screen_width - max_x
+        mirrored_max_x = screen_width - min_x
+
+        # Zeichne die gespiegelte Bounding Box
+        pygame.draw.rect(screen, (255, 0, 0), (mirrored_min_x, min_y, mirrored_max_x - mirrored_min_x, max_y - min_y), 2)
         
-        # ID über der Bounding Box anzeigen
+        # ID über der gespiegelten Bounding Box anzeigen
         font = pygame.font.SysFont("arial", 20)
         text = font.render("ID: 1", True, (255, 0, 0))
-        screen.blit(text, (min_x, min_y - 20))
+        screen.blit(text, (mirrored_min_x, min_y - 20))
 
     # -- add Text on screen (e.g. score)
     textFont = pygame.font.SysFont("arial", 26)
