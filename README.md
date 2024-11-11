@@ -5,7 +5,7 @@ Beschreibung
 
     Bewegungserkennung OpenCV
     Darstellung in einem Pygame-Fenster
-    Verwendung der MOG2-Methode zur Hintergrundsubtraktion
+    Verwendung der MOG2-Methode und KNN zur Hintergrundsubtraktion
 
 Voraussetzungen
 
@@ -18,17 +18,15 @@ Voraussetzungen
 
 Installation der Bibliotheken
 
-pip install numpy opencv-python pygame
+    pip install numpy opencv-python pygame
 
 Dateistruktur
 
     main.py: Hauptscript mit der Logik für Bewegungserkennung und Darstellung
 
-Ausführung
-
 Navigiere im Terminal zum Projektverzeichnis und führe aus:
 
-python main.py
+    python main.py
 
     Videoquelle: Standardmäßig Wand_Jacke_dunkel.mp4 (es gibt mehrere Video quellen)
 

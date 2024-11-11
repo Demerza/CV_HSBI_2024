@@ -7,12 +7,12 @@ SCREEN_HEIGHT = 720
 SCREEN       = [SCREEN_WIDTH, SCREEN_HEIGHT]
 
 # --------------------------------------------------------------------------
-# -- BackgroundSubtraction-Klasse mit MOG2-Methode (implementiert)
+# -- BackgroundSubtraction MOG2-Methode
 # --------------------------------------------------------------------------
 class BackgroundSubtraction:
     def __init__(self):
         # Hintergrund-Subtraktor initialisieren (MOG2 als Beispiel)
-        self.bg_subtractor = cv2.createBackgroundSubtractorMOG2(history=1000, varThreshold=16, detectShadows=False)
+        self.bg_subtractor = cv2.createBackgroundSubtractorMOG2(history=150, varThreshold=50, detectShadows=False)
 
     def apply(self, frame):
         # Hintergrund-Subtraktion anwenden
@@ -27,7 +27,7 @@ class BackgroundSubtraction:
         found_contour = False
         
         for contour in contours:
-            if cv2.contourArea(contour) > 150:  
+            if cv2.contourArea(contour) > 200:  
                 x, y, w, h = cv2.boundingRect(contour)
                 min_x, min_y = min(min_x, x), min(min_y, y)
                 max_x, max_y = max(max_x, x + w), max(max_y, y + h)
@@ -51,11 +51,11 @@ fps = 30
 clock = pygame.time.Clock()
 
 # Kamera- oder Videoquelle auswählen
-source = "webcam"  # Ändere auf "video" für eine Videodatei
+source = "webcm"  # Ändere auf "video" für eine Videodatei
 if source == "webcam":
     cap = cv2.VideoCapture(0)  # Webcam
 else:
-    cap = cv2.VideoCapture("Wand_shirt_hell.mp4")  # Videodatei (Dateiname anpassen)
+    cap = cv2.VideoCapture("Wand_shirt_dunkel.mp4")  # Videodatei (Dateiname anpassen)
 
 if not cap.isOpened():
     print("Fehler: Videoquelle konnte nicht geöffnet werden.")
@@ -89,10 +89,11 @@ while running:
         print("Fehler: Frame konnte nicht gelesen werden.")
         break
     
-    print("Frame erfolgreich gelesen.")
+    # print("Frame erfolgreich gelesen.")
 
     # Hintergrundsubtraktion und Bounding Box anwenden
     bbox, fg_mask = bg_subtraction.apply(cameraFrame)
+
 
     # Bild für Pygame anzeigen und rotieren
     imgRGB = cv2.cvtColor(cameraFrame, cv2.COLOR_BGR2RGB)
@@ -101,14 +102,14 @@ while running:
     screen.blit(gameFrame, (0, 0))
 
     # Zeige die Foreground Mask an, um die Erkennung zu überprüfen
-    # cv2.imshow("Foreground Mask", fg_mask)
-    # if cv2.waitKey(1) & 0xFF == ord('q'):
-    #  break
+    cv2.imshow("Foreground Mask", fg_mask)
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+     break
 
     # Zeichne die gespiegelte Bounding Box, wenn eine erkannt wurde
     if bbox:
         min_x, min_y, max_x, max_y = bbox
-        print("Bounding Box:", bbox)  # Debugging-Ausgabe
+        # print("Bounding Box:", bbox)  # Debugging-Ausgabe
 
         # Berechne gespiegelte Bounding Box-Koordinaten
         screen_width = screen.get_width()
