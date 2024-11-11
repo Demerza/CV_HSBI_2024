@@ -12,7 +12,7 @@ SCREEN       = [SCREEN_WIDTH, SCREEN_HEIGHT]
 class BackgroundSubtraction:
     def __init__(self):
         # Hintergrund-Subtraktor initialisieren (MOG2 als Beispiel)
-        self.bg_subtractor = cv2.createBackgroundSubtractorMOG2(history=500, varThreshold=16, detectShadows=True)
+        self.bg_subtractor = cv2.createBackgroundSubtractorMOG2(history=1000, varThreshold=16, detectShadows=False)
 
     def apply(self, frame):
         # Hintergrund-Subtraktion anwenden
@@ -27,7 +27,7 @@ class BackgroundSubtraction:
         found_contour = False
         
         for contour in contours:
-            if cv2.contourArea(contour) > 500:  # Schwellenwert auf 500 reduziert
+            if cv2.contourArea(contour) > 150:  
                 x, y, w, h = cv2.boundingRect(contour)
                 min_x, min_y = min(min_x, x), min(min_y, y)
                 max_x, max_y = max(max_x, x + w), max(max_y, y + h)
@@ -51,11 +51,11 @@ fps = 30
 clock = pygame.time.Clock()
 
 # Kamera- oder Videoquelle auswählen
-source = "video"  # Ändere auf "video" für eine Videodatei
+source = "webcam"  # Ändere auf "video" für eine Videodatei
 if source == "webcam":
     cap = cv2.VideoCapture(0)  # Webcam
 else:
-    cap = cv2.VideoCapture("Wand_Jacke_dunkel.mp4")  # Videodatei (Dateiname anpassen)
+    cap = cv2.VideoCapture("Wand_shirt_hell.mp4")  # Videodatei (Dateiname anpassen)
 
 if not cap.isOpened():
     print("Fehler: Videoquelle konnte nicht geöffnet werden.")
@@ -103,7 +103,7 @@ while running:
     # Zeige die Foreground Mask an, um die Erkennung zu überprüfen
     # cv2.imshow("Foreground Mask", fg_mask)
     # if cv2.waitKey(1) & 0xFF == ord('q'):
-    #     break
+    #  break
 
     # Zeichne die gespiegelte Bounding Box, wenn eine erkannt wurde
     if bbox:
