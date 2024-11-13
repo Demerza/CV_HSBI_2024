@@ -7,7 +7,7 @@ SCREEN_HEIGHT = 720
 SCREEN       = [SCREEN_WIDTH, SCREEN_HEIGHT]
 
 # --------------------------------------------------------------------------
-# -- K-Nearest Neighbors (KNN) Methode
+# -- BackgroundSubtraction K-Nearest Neighbors (KNN) Methode
 # --------------------------------------------------------------------------
 
 class BackgroundSubtraction:
@@ -17,7 +17,7 @@ class BackgroundSubtraction:
 
 
     def apply(self, frame):
-        # Wende die Hintergrundsubtraktion an
+        # Wendet die Hintergrundsubtraktion an
         fg_mask = self.bg_subtractor.apply(frame)
         
         # Konturen finden
@@ -29,7 +29,7 @@ class BackgroundSubtraction:
         found_contour = False
         
         for contour in contours:
-            if cv2.contourArea(contour) > 1000:  
+            if cv2.contourArea(contour) > 800:  
                 x, y, w, h = cv2.boundingRect(contour)
                 min_x, min_y = min(min_x, x), min(min_y, y)
                 max_x, max_y = max(max_x, x + w), max(max_y, y + h)
@@ -47,18 +47,18 @@ pygame.init()
 
 # set display size and caption
 screen = pygame.display.set_mode(SCREEN)
-pygame.display.set_caption("Computer Vision Game")
+pygame.display.set_caption("KNN-Methode")
 
 # init game clock
 fps = 30
 clock = pygame.time.Clock()
 
 # Kamera- oder Videoquelle auswählen
-source = "webcm"  # Ändere auf "video" für eine Videodatei
+source = "webcam"  # Ändere auf "video" für eine Videodatei
 if source == "webcam":
     cap = cv2.VideoCapture(0)  # Webcam
 else:
-    cap = cv2.VideoCapture("Wand_shirt_dunkel.mp4")  # Videodatei (Dateiname anpassen)
+    cap = cv2.VideoCapture("CV_HSBI_2024\Wand_shirt_dunkel.mp4")  # Videodatei (Dateiname anpassen)
 
 if not cap.isOpened():
     print("Fehler: Videoquelle konnte nicht geöffnet werden.")
@@ -72,7 +72,7 @@ cap.set(cv2.CAP_PROP_FRAME_HEIGHT, screen.get_height())
 bg_subtraction = BackgroundSubtraction()
 
 # example variable for game score
-gameScore = 0
+# gameScore = 0
 
 # -------------
 # -- main loop
@@ -127,9 +127,9 @@ while running:
         screen.blit(text, (mirrored_min_x, min_y - 20))
 
     # -- add Text on screen (e.g. score)
-    textFont = pygame.font.SysFont("arial", 26)
-    textExample = textFont.render(f'Score: {gameScore}', True, (255, 0, 0))
-    screen.blit(textExample, (20, 20))
+    # textFont = pygame.font.SysFont("arial", 26)
+    # textExample = textFont.render(f'Score: {gameScore}', True, (255, 0, 0))
+    # screen.blit(textExample, (20, 20))
 
     # update entire screen
     pygame.display.update()

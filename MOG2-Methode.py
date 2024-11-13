@@ -11,7 +11,7 @@ SCREEN       = [SCREEN_WIDTH, SCREEN_HEIGHT]
 # --------------------------------------------------------------------------
 class BackgroundSubtraction:
     def __init__(self):
-        # Hintergrund-Subtraktor initialisieren (MOG2 als Beispiel)
+        # Initialisiere den MOG2-Hintergrundsubtraktor mit angepassten Parametern
         self.bg_subtractor = cv2.createBackgroundSubtractorMOG2(history=150, varThreshold=50, detectShadows=False)
 
     def apply(self, frame):
@@ -51,11 +51,11 @@ fps = 30
 clock = pygame.time.Clock()
 
 # Kamera- oder Videoquelle auswählen
-source = "webcm"  # Ändere auf "video" für eine Videodatei
+source = "video"  # Ändere auf "video" für eine Videodatei
 if source == "webcam":
     cap = cv2.VideoCapture(0)  # Webcam
 else:
-    cap = cv2.VideoCapture("Wand_shirt_dunkel.mp4")  # Videodatei (Dateiname anpassen)
+    cap = cv2.VideoCapture("CV_HSBI_2024\Wand_shirt_dunkel.mp4")  # Videodatei (Dateiname anpassen)
 
 if not cap.isOpened():
     print("Fehler: Videoquelle konnte nicht geöffnet werden.")
