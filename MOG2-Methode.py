@@ -44,18 +44,18 @@ pygame.init()
 
 # set display size and caption
 screen = pygame.display.set_mode(SCREEN)
-pygame.display.set_caption("Computer Vision Game")
+pygame.display.set_caption("MOG2-Methode")
 
 # init game clock
 fps = 30
 clock = pygame.time.Clock()
 
 # Kamera- oder Videoquelle auswählen
-source = "video"  # Ändere auf "video" für eine Videodatei
+source = "webcam"  # Ändere auf "video" für eine Videodatei
 if source == "webcam":
     cap = cv2.VideoCapture(0)  # Webcam
 else:
-    cap = cv2.VideoCapture("CV_HSBI_2024\Wand_shirt_dunkel.mp4")  # Videodatei (Dateiname anpassen)
+    cap = cv2.VideoCapture("Wand_shirt_dunkel.mp4")  # Videodatei (Dateiname anpassen)
 
 if not cap.isOpened():
     print("Fehler: Videoquelle konnte nicht geöffnet werden.")
@@ -69,7 +69,7 @@ cap.set(cv2.CAP_PROP_FRAME_HEIGHT, screen.get_height())
 bg_subtraction = BackgroundSubtraction()
 
 # example variable for game score
-gameScore = 0
+# gameScore = 0
 
 # -------------
 # -- main loop
@@ -125,9 +125,9 @@ while running:
         screen.blit(text, (mirrored_min_x, min_y - 20))
 
     # -- add Text on screen (e.g. score)
-    textFont = pygame.font.SysFont("arial", 26)
-    textExample = textFont.render(f'Score: {gameScore}', True, (255, 0, 0))
-    screen.blit(textExample, (20, 20))
+    # textFont = pygame.font.SysFont("arial", 26)
+    # textExample = textFont.render(f'Score: {gameScore}', True, (255, 0, 0))
+    # screen.blit(textExample, (20, 20))
 
     # update entire screen
     pygame.display.update()
