@@ -54,11 +54,11 @@ fps = 30
 clock = pygame.time.Clock()
 
 # Kamera- oder Videoquelle auswählen
-source = "webcam"  # Ändere auf "video" für eine Videodatei
+source = "webca"  # Ändere auf "video" für eine Videodatei
 if source == "webcam":
     cap = cv2.VideoCapture(0)  # Webcam
 else:
-    cap = cv2.VideoCapture("CV_HSBI_2024\Wand_shirt_dunkel.mp4")  # Videodatei (Dateiname anpassen)
+    cap = cv2.VideoCapture("Neutral_Jacke_langsam.mp4")  # Videodatei (Dateiname anpassen)
 
 if not cap.isOpened():
     print("Fehler: Videoquelle konnte nicht geöffnet werden.")
@@ -104,7 +104,7 @@ while running:
     screen.blit(gameFrame, (0, 0))
 
     # Zeige die Foreground Mask an, um die Erkennung zu überprüfen
-    cv2.imshow("Foreground Mask", fg_mask)
+    # cv2.imshow("Foreground Mask", fg_mask)
     if cv2.waitKey(1) & 0xFF == ord('q'):
      break
 
