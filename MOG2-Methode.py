@@ -55,7 +55,7 @@ source = "webca"  # Ändere auf "video" für eine Videodatei
 if source == "webcam":
     cap = cv2.VideoCapture(0)  # Webcam
 else:
-    cap = cv2.VideoCapture("Neutral_Jacke_langsam.mp4")  # Videodatei (Dateiname anpassen)
+    cap = cv2.VideoCapture("Neutral_jacke_langsam.mp4")  # Videodatei (Dateiname anpassen)
 
 if not cap.isOpened():
     print("Fehler: Videoquelle konnte nicht geöffnet werden.")
