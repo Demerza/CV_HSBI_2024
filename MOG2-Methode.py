@@ -102,7 +102,7 @@ while running:
     screen.blit(gameFrame, (0, 0))
 
     # Zeige die Foreground Mask an, um die Erkennung zu überprüfen
-    # cv2.imshow("Foreground Mask", fg_mask)
+    cv2.imshow("Foreground Mask", fg_mask)
     if cv2.waitKey(1) & 0xFF == ord('q'):
      break
 
