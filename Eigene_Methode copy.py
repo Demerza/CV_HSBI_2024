@@ -65,7 +65,6 @@ class MotionTracker:
         x, y, w, h = cv2.boundingRect(largest_contour)
         return x, y, x + w, y + h
 
-
 # --------------------------------------------------------------------------
 # -- Main Program
 # --------------------------------------------------------------------------
@@ -88,7 +87,6 @@ ball_speed_y = -4
 
 paddle_width = 150
 paddle_height = 20
-paddle_x = SCREEN_WIDTH // 2 - paddle_width // 2
 paddle_y = SCREEN_HEIGHT - 50
 
 # Kamera- oder Videoquelle öffnen
@@ -107,9 +105,6 @@ cap.set(cv2.CAP_PROP_FRAME_HEIGHT, SCREEN_HEIGHT)
 
 # Tracker-Objekt erstellen
 tracker = MotionTracker()
-
-# Variable für die vorherige Bounding Box
-previous_bbox = None
 
 # Haupt-Loop
 running = True
@@ -131,23 +126,7 @@ while running:
     # Objektverfolgung
     bbox = tracker.track_object(motion_mask) if motion_mask is not None else None
 
-    # Glättung der Bounding Box (Pufferung und Stabilisierung)
-    if bbox:
-        if previous_bbox is not None:
-            # Vermeide Sprünge, indem die Bounding Box geglättet wird
-            min_x = int(0.7 * previous_bbox[0] + 0.3 * bbox[0])
-            min_y = int(0.7 * previous_bbox[1] + 0.3 * bbox[1])
-            max_x = int(0.7 * previous_bbox[2] + 0.3 * bbox[2])
-            max_y = int(0.7 * previous_bbox[3] + 0.3 * bbox[3])
-            bbox = (min_x, min_y, max_x, max_y)
-
-        # Speichere die aktuelle Bounding Box
-        previous_bbox = bbox
-    elif previous_bbox is not None:
-        # Nutze die vorherige Bounding Box, wenn keine neue erkannt wurde
-        bbox = previous_bbox
-
-    # Zentriere die Bounding Box, aber mache sie stabil
+    # Feste Bounding Box (zentriert und mit minimalem Springen)
     if bbox:
         min_x, min_y, max_x, max_y = bbox
 
@@ -165,10 +144,11 @@ while running:
 
         bbox = (min_x, min_y, max_x, max_y)
 
-        # Paddle basierend auf der gespiegelten Bounding Box bewegen
+    # Paddle basierend auf der gespiegelten Bounding Box bewegen
+    if bbox:
         screen_width = screen.get_width()
-        mirrored_min_x = screen_width - max_x
-        mirrored_max_x = screen_width - min_x
+        mirrored_min_x = screen_width - bbox[2]
+        mirrored_max_x = screen_width - bbox[0]
         paddle_x = (mirrored_min_x + mirrored_max_x) // 2 - paddle_width // 2
         paddle_x = max(0, min(SCREEN_WIDTH - paddle_width, paddle_x))
 
