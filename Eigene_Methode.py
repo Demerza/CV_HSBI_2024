@@ -79,7 +79,7 @@ fps = 30
 clock = pygame.time.Clock()
 
 # Kamera- oder Videoquelle öffnen
-source = "webca"  # Ändere auf "video" für eine Videodatei
+source = "webcam"  # Ändere auf "video" für eine Videodatei
 if source == "webcam":
     cap = cv2.VideoCapture(0)
 else:
@@ -94,6 +94,9 @@ cap.set(cv2.CAP_PROP_FRAME_HEIGHT, SCREEN_HEIGHT)
 
 # Tracker-Objekt erstellen
 tracker = MotionTracker()
+
+# Variable für die vorherige Bounding Box
+previous_bbox = None
 
 # Haupt-Loop
 running = True
@@ -114,6 +117,37 @@ while running:
 
     # Objektverfolgung
     bbox = tracker.track_object(motion_mask) if motion_mask is not None else None
+
+    # Glättung der Bounding Box (Pufferung)
+    if bbox:
+        if previous_bbox is not None:
+            # Glätte die Bounding Box (Mittelwert zwischen vorheriger und aktueller Position)
+            min_x = int(0.7 * previous_bbox[0] + 0.3 * bbox[0])
+            min_y = int(0.7 * previous_bbox[1] + 0.3 * bbox[1])
+            max_x = int(0.7 * previous_bbox[2] + 0.3 * bbox[2])
+            max_y = int(0.7 * previous_bbox[3] + 0.3 * bbox[3])
+            bbox = (min_x, min_y, max_x, max_y)
+
+        # Speichere die aktuelle Bounding Box
+        previous_bbox = bbox
+    elif previous_bbox is not None:
+        # Verwende die vorherige Bounding Box, wenn keine neue erkannt wurde
+        bbox = previous_bbox
+
+    # Zentriere die Bounding Box
+    if bbox:
+        center_x = (bbox[0] + bbox[2]) // 2
+        center_y = (bbox[1] + bbox[3]) // 2
+
+        box_width = 150  # Feste Breite der Bounding Box
+        box_height = 300  # Feste Höhe der Bounding Box
+
+        min_x = max(0, center_x - box_width // 2)
+        max_x = min(SCREEN_WIDTH, center_x + box_width // 2)
+        min_y = max(0, center_y - box_height // 2)
+        max_y = min(SCREEN_HEIGHT, center_y + box_height // 2)
+
+        bbox = (min_x, min_y, max_x, max_y)
 
     # Frame für Pygame vorbereiten
     imgRGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -139,7 +173,6 @@ while running:
         font = pygame.font.SysFont("arial", 20)
         text = font.render("ID: 1", True, (255, 0, 0))
         screen.blit(text, (mirrored_min_x, min_y - 20))
-
 
     # Foreground-Maske (Debugging)
     if motion_mask is not None:
