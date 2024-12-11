@@ -14,7 +14,7 @@ class MotionTracker:
     def __init__(self):
         self.previous_frame = None
 
-    def detect_motion(self, current_frame, threshold=10):
+    def detect_motion(self, current_frame, threshold=8):
         """
         Verwendet Frame-Differenzen zur Bewegungserkennung.
         """
@@ -56,8 +56,8 @@ class MotionTracker:
         # Größte Kontur auswählen
         largest_contour = max(contours, key=cv2.contourArea)
 
-        # Mindestgröße überprüfen, um Rauschen zu ignorieren
-        if cv2.contourArea(largest_contour) < 1500:
+        # Mindestgröße überprüfen, um kleine Bewegungen zu ignorieren
+        if cv2.contourArea(largest_contour) < 2000:  # Mindestfläche für Körper
             return None
 
         # Bounding Box berechnen
@@ -118,10 +118,10 @@ while running:
     # Objektverfolgung
     bbox = tracker.track_object(motion_mask) if motion_mask is not None else None
 
-    # Glättung der Bounding Box (Pufferung)
+    # Glättung der Bounding Box (Pufferung und Stabilisierung)
     if bbox:
         if previous_bbox is not None:
-            # Glätte die Bounding Box (Mittelwert zwischen vorheriger und aktueller Position)
+            # Vermeide Sprünge, indem die Bounding Box geglättet wird
             min_x = int(0.7 * previous_bbox[0] + 0.3 * bbox[0])
             min_y = int(0.7 * previous_bbox[1] + 0.3 * bbox[1])
             max_x = int(0.7 * previous_bbox[2] + 0.3 * bbox[2])
@@ -131,16 +131,19 @@ while running:
         # Speichere die aktuelle Bounding Box
         previous_bbox = bbox
     elif previous_bbox is not None:
-        # Verwende die vorherige Bounding Box, wenn keine neue erkannt wurde
+        # Nutze die vorherige Bounding Box, wenn keine neue erkannt wurde
         bbox = previous_bbox
 
-    # Zentriere die Bounding Box
+    # Zentriere die Bounding Box, aber mache sie stabil
     if bbox:
-        center_x = (bbox[0] + bbox[2]) // 2
-        center_y = (bbox[1] + bbox[3]) // 2
+        min_x, min_y, max_x, max_y = bbox
 
-        box_width = 150  # Feste Breite der Bounding Box
-        box_height = 300  # Feste Höhe der Bounding Box
+        # Berechne den Körpermittelpunkt und erweitere die Box leicht
+        center_x = (min_x + max_x) // 2
+        center_y = (min_y + max_y) // 2
+
+        box_width = max(max_x - min_x, 200)  # Mindestens 200 Pixel breit
+        box_height = max(max_y - min_y, 300)  # Mindestens 300 Pixel hoch
 
         min_x = max(0, center_x - box_width // 2)
         max_x = min(SCREEN_WIDTH, center_x + box_width // 2)
