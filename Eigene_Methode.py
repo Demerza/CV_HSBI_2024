@@ -65,7 +65,6 @@ class MotionTracker:
         x, y, w, h = cv2.boundingRect(largest_contour)
         return x, y, x + w, y + h
 
-
 # --------------------------------------------------------------------------
 # -- Main Program
 # --------------------------------------------------------------------------
@@ -90,6 +89,13 @@ paddle_width = 150
 paddle_height = 20
 paddle_x = SCREEN_WIDTH // 2 - paddle_width // 2
 paddle_y = SCREEN_HEIGHT - 50
+
+# Punkte und Leben initialisieren
+score = 0
+lives = 3
+
+# Schriftart für Score und Leben
+font = pygame.font.SysFont("arial", 24)
 
 # Kamera- oder Videoquelle öffnen
 source = "webca"  # Ändere auf "video" für eine Videodatei
@@ -189,13 +195,19 @@ while running:
     ):
         ball_speed_y *= -1
         ball_y = paddle_y - ball_radius
+        score += 1
 
     if ball_y - ball_radius > SCREEN_HEIGHT:
-        # Ball verpasst (optional: Neustart)
+        # Ball verpasst
+        lives -= 1
         ball_x = SCREEN_WIDTH // 2
         ball_y = SCREEN_HEIGHT // 2
         ball_speed_x = random.choice([-4, 4])
         ball_speed_y = -4
+
+        if lives <= 0:
+            print("Game Over!")
+            running = False
 
     # Frame für Pygame vorbereiten
     imgRGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -228,11 +240,17 @@ while running:
     # Ball zeichnen
     pygame.draw.circle(screen, (255, 0, 0), (ball_x, ball_y), ball_radius)
 
-    # Foreground-Maske (Debugging)
+    # Score und Leben anzeigen (links oben)
+    score_text = font.render(f"Score: {score}", True, (255, 255, 255))
+    lives_text = font.render(f"Lives: {lives}", True, (255, 255, 255))
+    screen.blit(score_text, (10, 10))
+    screen.blit(lives_text, (10, 40))
+
+    # Foreground-Maske (Debugging oben rechts)
     if motion_mask is not None:
         fg_mask_resized = cv2.resize(motion_mask, (320, 180))  # Maske verkleinern
         fg_mask_surface = pygame.surfarray.make_surface(np.rot90(fg_mask_resized))
-        screen.blit(fg_mask_surface, (10, 10))  # Debugging: Maske in der Ecke anzeigen
+        screen.blit(fg_mask_surface, (SCREEN_WIDTH - 330, 10))  # Debugging: Maske oben rechts anzeigen
 
     # Update des Pygame-Displays
     pygame.display.update()
