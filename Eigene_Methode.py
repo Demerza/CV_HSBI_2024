@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 import pygame
+import random
 
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
@@ -33,7 +34,7 @@ class MotionTracker:
         _, binary_mask = cv2.threshold(frame_diff, threshold, 255, cv2.THRESH_BINARY)
 
         # Noise entfernen
-        kernel = np.ones((5, 5), np.uint8)
+        kernel = np.ones((3, 3), np.uint8)
         binary_mask = cv2.morphologyEx(binary_mask, cv2.MORPH_OPEN, kernel)
         binary_mask = cv2.morphologyEx(binary_mask, cv2.MORPH_CLOSE, kernel)
 
@@ -64,7 +65,6 @@ class MotionTracker:
         x, y, w, h = cv2.boundingRect(largest_contour)
         return x, y, x + w, y + h
 
-
 # --------------------------------------------------------------------------
 # -- Main Program
 # --------------------------------------------------------------------------
@@ -72,11 +72,23 @@ class MotionTracker:
 # Pygame initialisieren
 pygame.init()
 screen = pygame.display.set_mode(SCREEN)
-pygame.display.set_caption("Single Object Tracking")
+pygame.display.set_caption("Ball Hochhalten mit Motion Tracking")
 
 # Init game clock
 fps = 30
 clock = pygame.time.Clock()
+
+# Ball und Platte initialisieren
+ball_radius = 15
+ball_x = SCREEN_WIDTH // 2
+ball_y = SCREEN_HEIGHT // 2
+ball_speed_x = random.choice([-4, 4])
+ball_speed_y = -4
+
+paddle_width = 150
+paddle_height = 20
+paddle_x = SCREEN_WIDTH // 2 - paddle_width // 2
+paddle_y = SCREEN_HEIGHT - 50
 
 # Kamera- oder Videoquelle öffnen
 source = "webca"  # Ändere auf "video" für eine Videodatei
@@ -123,10 +135,8 @@ while running:
         if previous_bbox is not None:
             # Vermeide Sprünge, indem die Bounding Box geglättet wird
             min_x = int(0.7 * previous_bbox[0] + 0.3 * bbox[0])
-            min_y = int(0.7 * previous_bbox[1] + 0.3 * bbox[1])
             max_x = int(0.7 * previous_bbox[2] + 0.3 * bbox[2])
-            max_y = int(0.7 * previous_bbox[3] + 0.3 * bbox[3])
-            bbox = (min_x, min_y, max_x, max_y)
+            bbox = (min_x, bbox[1], max_x, bbox[3])
 
         # Speichere die aktuelle Bounding Box
         previous_bbox = bbox
@@ -134,23 +144,38 @@ while running:
         # Nutze die vorherige Bounding Box, wenn keine neue erkannt wurde
         bbox = previous_bbox
 
-    # Zentriere die Bounding Box, aber mache sie stabil
+    # Paddle basierend auf der gespiegelten Bounding Box bewegen
     if bbox:
-        min_x, min_y, max_x, max_y = bbox
+        screen_width = screen.get_width()
+        mirrored_min_x = screen_width - bbox[2]
+        mirrored_max_x = screen_width - bbox[0]
+        paddle_x = (mirrored_min_x + mirrored_max_x) // 2 - paddle_width // 2
+        paddle_x = max(0, min(SCREEN_WIDTH - paddle_width, paddle_x))
 
-        # Berechne den Körpermittelpunkt und erweitere die Box leicht
-        center_x = (min_x + max_x) // 2
-        center_y = (min_y + max_y) // 2
+    # Ballbewegung aktualisieren
+    ball_x += ball_speed_x
+    ball_y += ball_speed_y
 
-        box_width = max(max_x - min_x, 200)  # Mindestens 200 Pixel breit
-        box_height = max(max_y - min_y, 300)  # Mindestens 300 Pixel hoch
+    # Ball-Kollisionen überprüfen
+    if ball_x - ball_radius <= 0 or ball_x + ball_radius >= SCREEN_WIDTH:
+        ball_speed_x *= -1
 
-        min_x = max(0, center_x - box_width // 2)
-        max_x = min(SCREEN_WIDTH, center_x + box_width // 2)
-        min_y = max(0, center_y - box_height // 2)
-        max_y = min(SCREEN_HEIGHT, center_y + box_height // 2)
+    if ball_y - ball_radius <= 0:
+        ball_speed_y *= -1
 
-        bbox = (min_x, min_y, max_x, max_y)
+    if (
+        paddle_y <= ball_y + ball_radius <= paddle_y + paddle_height and
+        paddle_x <= ball_x <= paddle_x + paddle_width
+    ):
+        ball_speed_y *= -1
+        ball_y = paddle_y - ball_radius
+
+    if ball_y - ball_radius > SCREEN_HEIGHT:
+        # Ball verpasst (optional: Neustart)
+        ball_x = SCREEN_WIDTH // 2
+        ball_y = SCREEN_HEIGHT // 2
+        ball_speed_x = random.choice([-4, 4])
+        ball_speed_y = -4
 
     # Frame für Pygame vorbereiten
     imgRGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -176,6 +201,12 @@ while running:
         font = pygame.font.SysFont("arial", 20)
         text = font.render("ID: 1", True, (255, 0, 0))
         screen.blit(text, (mirrored_min_x, min_y - 20))
+
+    # Platte zeichnen
+    pygame.draw.rect(screen, (0, 255, 0), (paddle_x, paddle_y, paddle_width, paddle_height))
+
+    # Ball zeichnen
+    pygame.draw.circle(screen, (255, 0, 0), (ball_x, ball_y), ball_radius)
 
     # Foreground-Maske (Debugging)
     if motion_mask is not None:
