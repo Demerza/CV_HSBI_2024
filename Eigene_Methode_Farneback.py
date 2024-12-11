@@ -7,39 +7,44 @@ SCREEN_HEIGHT = 720
 SCREEN = [SCREEN_WIDTH, SCREEN_HEIGHT]
 
 # --------------------------------------------------------------------------
-# -- Motion Tracker
+# -- Motion Tracker with Optical Flow
 # --------------------------------------------------------------------------
 
 class MotionTracker:
     def __init__(self):
-        self.previous_frame = None
+        self.previous_gray = None
 
-    def detect_motion(self, current_frame, threshold=10):
+    def detect_motion(self, current_frame):
         """
-        Verwendet Frame-Differenzen zur Bewegungserkennung.
+        Verwendet optischen Fluss (Farneback-Methode) zur Bewegungserkennung.
         """
-        if self.previous_frame is None:
-            self.previous_frame = current_frame
+        # Frames in Graustufen konvertieren
+        current_gray = cv2.cvtColor(current_frame, cv2.COLOR_BGR2GRAY)
+
+        if self.previous_gray is None:
+            # Speichere das erste Frame als Referenz
+            self.previous_gray = current_gray
             return None
 
-        # Frames in Graustufen konvertieren
-        gray_prev = cv2.cvtColor(self.previous_frame, cv2.COLOR_BGR2GRAY)
-        gray_curr = cv2.cvtColor(current_frame, cv2.COLOR_BGR2GRAY)
+        # Berechnung des optischen Flusses
+        flow = cv2.calcOpticalFlowFarneback(
+            self.previous_gray, current_gray, None, 0.5, 3, 15, 3, 5, 1.2, 0
+        )
 
-        # Frame-Differenz berechnen
-        frame_diff = cv2.absdiff(gray_prev, gray_curr)
+        # Magnitude und Winkel des Flusses berechnen
+        magnitude, _ = cv2.cartToPolar(flow[..., 0], flow[..., 1])
 
-        # Schwellenwert anwenden
-        _, binary_mask = cv2.threshold(frame_diff, threshold, 255, cv2.THRESH_BINARY)
+        # Bewegungsmaske erstellen basierend auf Magnitude
+        motion_mask = cv2.threshold(magnitude, 2, 255, cv2.THRESH_BINARY)[1].astype(np.uint8)
 
         # Noise entfernen
         kernel = np.ones((5, 5), np.uint8)
-        binary_mask = cv2.morphologyEx(binary_mask, cv2.MORPH_OPEN, kernel)
-        binary_mask = cv2.morphologyEx(binary_mask, cv2.MORPH_CLOSE, kernel)
+        motion_mask = cv2.morphologyEx(motion_mask, cv2.MORPH_OPEN, kernel)
+        motion_mask = cv2.morphologyEx(motion_mask, cv2.MORPH_CLOSE, kernel)
 
         # Speichere das aktuelle Frame für den nächsten Schritt
-        self.previous_frame = current_frame
-        return binary_mask
+        self.previous_gray = current_gray
+        return motion_mask
 
     def track_object(self, binary_mask):
         """
@@ -72,7 +77,7 @@ class MotionTracker:
 # Pygame initialisieren
 pygame.init()
 screen = pygame.display.set_mode(SCREEN)
-pygame.display.set_caption("Single Object Tracking")
+pygame.display.set_caption("Single Object Tracking with Optical Flow")
 
 # Init game clock
 fps = 30
@@ -112,7 +117,7 @@ while running:
     if not ret:
         break
 
-    # Bewegungserkennung
+    # Bewegungserkennung mit optischem Fluss
     motion_mask = tracker.detect_motion(frame)
 
     # Objektverfolgung
@@ -133,21 +138,6 @@ while running:
     elif previous_bbox is not None:
         # Verwende die vorherige Bounding Box, wenn keine neue erkannt wurde
         bbox = previous_bbox
-
-    # Zentriere die Bounding Box
-    if bbox:
-        center_x = (bbox[0] + bbox[2]) // 2
-        center_y = (bbox[1] + bbox[3]) // 2
-
-        box_width = 150  # Feste Breite der Bounding Box
-        box_height = 300  # Feste Höhe der Bounding Box
-
-        min_x = max(0, center_x - box_width // 2)
-        max_x = min(SCREEN_WIDTH, center_x + box_width // 2)
-        min_y = max(0, center_y - box_height // 2)
-        max_y = min(SCREEN_HEIGHT, center_y + box_height // 2)
-
-        bbox = (min_x, min_y, max_x, max_y)
 
     # Frame für Pygame vorbereiten
     imgRGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
