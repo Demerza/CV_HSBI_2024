@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 import pygame
+import random
 
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
@@ -64,7 +65,6 @@ class MotionTracker:
         x, y, w, h = cv2.boundingRect(largest_contour)
         return x, y, x + w, y + h
 
-
 # --------------------------------------------------------------------------
 # -- Main Program
 # --------------------------------------------------------------------------
@@ -72,11 +72,30 @@ class MotionTracker:
 # Pygame initialisieren
 pygame.init()
 screen = pygame.display.set_mode(SCREEN)
-pygame.display.set_caption("Single Object Tracking")
+pygame.display.set_caption("Ball Hochhalten mit Motion Tracking")
 
 # Init game clock
 fps = 30
 clock = pygame.time.Clock()
+
+# Ball und Platte initialisieren
+ball_radius = 15
+ball_x = SCREEN_WIDTH // 2
+ball_y = SCREEN_HEIGHT // 2
+ball_speed_x = random.choice([-4, 4])
+ball_speed_y = -4
+
+paddle_width = 150
+paddle_height = 20
+paddle_x = SCREEN_WIDTH // 2 - paddle_width // 2
+paddle_y = SCREEN_HEIGHT - 50
+
+# Punkte und Leben initialisieren
+score = 0
+lives = 3
+
+# Schriftart für Score und Leben
+font = pygame.font.SysFont("arial", 24)
 
 # Kamera- oder Videoquelle öffnen
 source = "webca"  # Ändere auf "video" für eine Videodatei
@@ -138,12 +157,12 @@ while running:
     if bbox:
         min_x, min_y, max_x, max_y = bbox
 
-        # Berechne den Körpermittelpunkt und erweitere die Box leicht
+        # Berechne den Körpermittelpunkt und setze feste Größe
         center_x = (min_x + max_x) // 2
         center_y = (min_y + max_y) // 2
 
         box_width = max(max_x - min_x, 200)  # Mindestens 200 Pixel breit
-        box_height = max(max_y - min_y, 300)  # Mindestens 300 Pixel hoch
+        box_height = max(max_y - min_y, 300) 
 
         min_x = max(0, center_x - box_width // 2)
         max_x = min(SCREEN_WIDTH, center_x + box_width // 2)
@@ -151,6 +170,44 @@ while running:
         max_y = min(SCREEN_HEIGHT, center_y + box_height // 2)
 
         bbox = (min_x, min_y, max_x, max_y)
+
+        # Paddle basierend auf der gespiegelten Bounding Box bewegen
+        screen_width = screen.get_width()
+        mirrored_min_x = screen_width - max_x
+        mirrored_max_x = screen_width - min_x
+        paddle_x = (mirrored_min_x + mirrored_max_x) // 2 - paddle_width // 2
+        paddle_x = max(0, min(SCREEN_WIDTH - paddle_width, paddle_x))
+
+    # Ballbewegung aktualisieren
+    ball_x += ball_speed_x
+    ball_y += ball_speed_y
+
+    # Ball-Kollisionen überprüfen
+    if ball_x - ball_radius <= 0 or ball_x + ball_radius >= SCREEN_WIDTH:
+        ball_speed_x *= -1
+
+    if ball_y - ball_radius <= 0:
+        ball_speed_y *= -1
+
+    if (
+        paddle_y <= ball_y + ball_radius <= paddle_y + paddle_height and
+        paddle_x <= ball_x <= paddle_x + paddle_width
+    ):
+        ball_speed_y *= -1
+        ball_y = paddle_y - ball_radius
+        score += 1
+
+    if ball_y - ball_radius > SCREEN_HEIGHT:
+        # Ball verpasst
+        lives -= 1
+        ball_x = SCREEN_WIDTH // 2
+        ball_y = SCREEN_HEIGHT // 2
+        ball_speed_x = random.choice([-4, 4])
+        ball_speed_y = -4
+
+        if lives <= 0:
+            print("Game Over!")
+            running = False
 
     # Frame für Pygame vorbereiten
     imgRGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -177,11 +234,23 @@ while running:
         text = font.render("ID: 1", True, (255, 0, 0))
         screen.blit(text, (mirrored_min_x, min_y - 20))
 
-    # Foreground-Maske (Debugging)
+    # Platte zeichnen
+    pygame.draw.rect(screen, (0, 255, 0), (paddle_x, paddle_y, paddle_width, paddle_height))
+
+    # Ball zeichnen
+    pygame.draw.circle(screen, (255, 0, 0), (ball_x, ball_y), ball_radius)
+
+    # Score und Leben anzeigen (links oben)
+    score_text = font.render(f"Score: {score}", True, (255, 255, 255))
+    lives_text = font.render(f"Lives: {lives}", True, (255, 255, 255))
+    screen.blit(score_text, (10, 10))
+    screen.blit(lives_text, (10, 40))
+
+    # Foreground-Maske (Debugging oben rechts)
     if motion_mask is not None:
         fg_mask_resized = cv2.resize(motion_mask, (320, 180))  # Maske verkleinern
         fg_mask_surface = pygame.surfarray.make_surface(np.rot90(fg_mask_resized))
-        screen.blit(fg_mask_surface, (10, 10))  # Debugging: Maske in der Ecke anzeigen
+        screen.blit(fg_mask_surface, (SCREEN_WIDTH - 330, 10))  # Debugging: Maske oben rechts anzeigen
 
     # Update des Pygame-Displays
     pygame.display.update()
