@@ -33,7 +33,7 @@ class MotionTracker:
         _, binary_mask = cv2.threshold(frame_diff, threshold, 255, cv2.THRESH_BINARY)
 
         # Noise entfernen
-        kernel = np.ones((2, 2), np.uint8)
+        kernel = np.ones((4, 4), np.uint8)
         binary_mask = cv2.morphologyEx(binary_mask, cv2.MORPH_OPEN, kernel)
         binary_mask = cv2.morphologyEx(binary_mask, cv2.MORPH_CLOSE, kernel)
 
@@ -82,7 +82,7 @@ source = "webca"  # Ändere auf "video" für eine Videodatei
 if source == "webcam":
     cap = cv2.VideoCapture(0)
 else:
-    cap = cv2.VideoCapture("Neutral_jacke_langsam.mp4")  # Passe den Dateinamen an
+    cap = cv2.VideoCapture("Videos/ArmeSchleudern_links_rechts.mp4")  # Passe den Dateinamen an
 
 if not cap.isOpened():
     print("Fehler: Videoquelle konnte nicht geöffnet werden.")

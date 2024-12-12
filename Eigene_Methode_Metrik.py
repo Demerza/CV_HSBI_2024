@@ -1,11 +1,8 @@
 import numpy as np
 import cv2
-import pygame
-import random
 
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
-SCREEN = [SCREEN_WIDTH, SCREEN_HEIGHT]
 
 # --------------------------------------------------------------------------
 # -- Motion Tracker
@@ -110,27 +107,28 @@ def process_video(video_path, tracker):
 # --------------------------------------------------------------------------
 
 # Tracker erstellen
-tracker1 = MotionTracker()
-tracker2 = MotionTracker()
+trackers = [MotionTracker() for _ in range(6)]
 
-# Video 1 verarbeiten
-video1_path = "Neutral_jacke_langsam.mp4"  # Ersetze mit deinem ersten Video
-mce_video1 = process_video(video1_path, tracker1)
-avg_mce_video1 = np.mean(mce_video1)
+# Video-Pfade definieren
+video_paths = [
+    "Videos/ArmeSchleudern_links_rechts.mp4",
+    "Videos/link_rechts_hinten_vorne.mp4",
+    "Videos/links_rechts_dynamisch.mp4",
+    "Videos/schnell_links_rechts.mp4",
+    "Videos/StartimVideo_links_rechts.mp4"
+]
 
-# Video 2 verarbeiten
-video2_path = "Neutral_jacke_schnell.mp4"  # Ersetze mit deinem zweiten Video
-mce_video2 = process_video(video2_path, tracker2)
-avg_mce_video2 = np.mean(mce_video2)
+# MCE für jedes Video berechnen
+results = []
+for i, video_path in enumerate(video_paths):
+    mce_values = process_video(video_path, trackers[i])
+    avg_mce = np.mean(mce_values)
+    results.append((video_path, avg_mce))
 
 # Ergebnisse ausgeben
-print(f"Durchschnittliche MCE für Video 1 ({video1_path}): {avg_mce_video1}")
-print(f"Durchschnittliche MCE für Video 2 ({video2_path}): {avg_mce_video2}")
+for video_path, avg_mce in results:
+    print(f"Durchschnittliche MCE für {video_path}: {avg_mce}")
 
 # Vergleich der Ergebnisse
-if avg_mce_video1 < avg_mce_video2:
-    print("Video 1 hat stabileres Tracking.")
-elif avg_mce_video1 > avg_mce_video2:
-    print("Video 2 hat stabileres Tracking.")
-else:
-    print("Beide Videos haben gleichwertiges Tracking.")
+best_video = min(results, key=lambda x: x[1])
+print(f"Das Video mit dem stabilsten Tracking ist: {best_video[0]} mit einer MCE von {best_video[1]}")

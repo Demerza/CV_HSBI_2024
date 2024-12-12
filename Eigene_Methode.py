@@ -82,7 +82,7 @@ source = "webca"
 if source == "webcam":
     cap = cv2.VideoCapture(0)
 else:
-    cap = cv2.VideoCapture("Neutral_jacke_langsam.mp4")
+    cap = cv2.VideoCapture("Videos/link_rechts_hinten_vorne.mp4")
 
 if not cap.isOpened():
     print("Fehler: Videoquelle konnte nicht geöffnet werden.")
