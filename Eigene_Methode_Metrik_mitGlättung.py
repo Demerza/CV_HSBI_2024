@@ -43,11 +43,11 @@ class MotionTracker:
         Findet die größte Bewegung und gibt eine Bounding Box zurück.
     """    
     def track_object(self, binary_mask):
-        
+        # Überprüfen, ob eine Bewegungsmaske existiert
         if binary_mask is None:
             return None
 
-        # Konturen finden
+        # Konturen in der Maske finden
         contours, _ = cv2.findContours(binary_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         if len(contours) == 0:
             return None
