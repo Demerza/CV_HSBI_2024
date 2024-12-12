@@ -102,7 +102,7 @@ source = "webca"  # Ändere auf "video" für eine Videodatei
 if source == "webcam":
     cap = cv2.VideoCapture(0)
 else:
-    cap = cv2.VideoCapture("Videos/link_rechts_hinten_vorne.mp4")  # Passe den Dateinamen an
+    cap = cv2.VideoCapture("Videos/draußen_links_rechts_dynamisch.mp4")  # Passe den Dateinamen an
 
 if not cap.isOpened():
     print("Fehler: Videoquelle konnte nicht geöffnet werden.")
