@@ -11,11 +11,11 @@ SCREEN_HEIGHT = 720
 class MotionTracker:
     def __init__(self):
         self.previous_frame = None
-
-    def detect_motion(self, current_frame, threshold=8):
-        """
+    """
         Verwendet Frame-Differenzen zur Bewegungserkennung.
-        """
+    """
+    def detect_motion(self, current_frame, threshold=8):
+        # Überprüfen, ob ein vorheriges Frame existiert
         if self.previous_frame is None:
             self.previous_frame = current_frame
             return None
@@ -30,7 +30,7 @@ class MotionTracker:
         # Schwellenwert anwenden
         _, binary_mask = cv2.threshold(frame_diff, threshold, 255, cv2.THRESH_BINARY)
 
-        # Noise entfernen
+        # Rauschen entfernen
         kernel = np.ones((2, 2), np.uint8)
         binary_mask = cv2.morphologyEx(binary_mask, cv2.MORPH_OPEN, kernel)
         binary_mask = cv2.morphologyEx(binary_mask, cv2.MORPH_CLOSE, kernel)
@@ -39,10 +39,11 @@ class MotionTracker:
         self.previous_frame = current_frame
         return binary_mask
 
-    def track_object(self, binary_mask):
-        """
+    """
         Findet die größte Bewegung und gibt eine Bounding Box zurück.
-        """
+    """    
+    def track_object(self, binary_mask):
+        
         if binary_mask is None:
             return None
 
