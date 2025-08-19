@@ -1,38 +1,78 @@
-# CV_2024
-Computer Vision - Pong Game 
+🎮 Computer Vision – Pong Game mit OpenCV & Pygame
+📌 Projektbeschreibung
 
-Beschreibung
+Dieses Projekt kombiniert Computer Vision mit einem klassischen Pong-Spiel, um Bewegungserkennung interaktiv sichtbar zu machen.
+Das Ziel ist es, ein Videobild (z. B. aus einer Datei oder Webcam) mit OpenCV zu verarbeiten, bewegliche Objekte zu erkennen und deren Positionen in einem Pygame-Fenster darzustellen.
 
-    Bewegungserkennung OpenCV
-    Darstellung in einem Pygame-Fenster
-    Verwendung der MOG2-Methode und KNN zur Hintergrundsubtraktion
+Dabei kommen verschiedene Methoden der Hintergrundsubtraktion zum Einsatz, wie MOG2 und KNN, um bewegte Objekte von einem statischen Hintergrund zu unterscheiden.
 
-Voraussetzungen
+Die Bounding Boxes der erkannten Objekte werden live angezeigt und können für weitere Anwendungen (z. B. Tracking, Interaktionen im Spiel, Objektanalyse) genutzt werden.
 
-    Python
+🚀 Features
 
-    Bibliotheken:
-        numpy
-        opencv-python
-        pygame
+🎥 Videoquellen: Nutzung von Videodateien oder der Webcam
 
-Installation der Bibliotheken
+🔍 Bewegungserkennung mit OpenCV (MOG2 & KNN Hintergrundsubtraktion)
 
-    pip install numpy opencv-python pygame
+📦 Bounding Boxes zur Markierung bewegter Objekte
 
-Dateistruktur
+🖼 Visualisierung im Pygame-Fenster (statt nur in OpenCV)
 
-    main.py: Hauptscript mit der Logik für Bewegungserkennung und Darstellung
+⚡ Echtzeit-fähig für einfache Bewegungsanalyse und Spielelogik
 
-Navigiere im Terminal zum Projektverzeichnis und führe aus:
+📂 Projektstruktur
 
-    python main.py
+📦 project-root
+ ┣ 📜 main.py          # Hauptskript: Bewegungserkennung & Visualisierung
+ ┣ 📜 README.md        # Projektdokumentation
+ ┗ 📂 videos/          # Beispielvideos (z. B. Wand_Jacke_dunkel.mp4)
 
-    Videoquelle: Standardmäßig Wand_Jacke_dunkel.mp4 (es gibt mehrere Video quellen)
+🛠 Voraussetzungen
 
-    Ändere den Dateinamen im Script für andere Videos oder setze source auf "webcam" für Webcam-Nutzung
+Python 3.8+
 
-Funktionen
+Benötigte Bibliotheken
+pip install numpy opencv-python pygame
 
-    Erkennt bewegliche Objekte und zeichnet Bounding Boxes
-    Visualisiert das Video und Erkennungen in Pygame
+▶️ Ausführung
+
+Projekt klonen oder herunterladen
+
+Im Terminal ins Projektverzeichnis wechseln
+
+Skript starten mit:
+python main.py
+
+Standardmäßig wird das Video Wand_Jacke_dunkel.mp4 genutzt.
+
+Um die Quelle zu ändern, den Dateinamen im Code anpassen
+
+Für Webcam-Nutzung: source = "webcam" setzen
+
+🎯 Funktionsweise im Detail
+
+Videoframes laden (entweder Datei oder Webcam)
+
+Hintergrundsubtraktion anwenden (MOG2 oder KNN)
+
+Konturenanalyse → Erkennen von bewegten Objekten
+
+Bounding Boxes zeichnen zur Markierung dieser Objekte
+
+Darstellung im Pygame-Fenster mit live aktualisiertem Bild
+
+💡 Anwendungsmöglichkeiten
+
+Dieses Projekt dient als Grundlage für verschiedene Szenarien:
+
+Objekterkennung & -verfolgung in Videos
+
+Spielersteuerung in einfachen Games über Bewegung
+
+Experimente mit verschiedenen Computer-Vision-Algorithmen
+
+Einstieg in KI-gestützte Bildverarbeitung
+
+📸 Beispiel
+
+Video wird geladen → Objekte bewegen sich → Bounding Boxes erscheinen → Ausgabe live im Pygame-Fenster
