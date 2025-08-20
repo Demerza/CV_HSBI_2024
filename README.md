@@ -62,8 +62,6 @@ Bounding Boxes zeichnen zur Markierung dieser Objekte
 
 Darstellung im Pygame-Fenster mit live aktualisiertem Bild
 
-https://github.com/user-attachments/assets/e6034030-5987-4645-ac26-dc711a36dda5
-
 
 
 ### 💡 Anwendungsmöglichkeiten
@@ -81,3 +79,7 @@ Einstieg in KI-gestützte Bildverarbeitung
 ### 📸 Beispiel
 
 Video wird geladen → Objekte bewegen sich → Bounding Boxes erscheinen → Ausgabe live im Pygame-Fenster
+
+
+### Teaser Video
+https://github.com/user-attachments/assets/e6034030-5987-4645-ac26-dc711a36dda5
