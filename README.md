@@ -62,6 +62,10 @@ Bounding Boxes zeichnen zur Markierung dieser Objekte
 
 Darstellung im Pygame-Fenster mit live aktualisiertem Bild
 
+https://github.com/user-attachments/assets/e6034030-5987-4645-ac26-dc711a36dda5
+
+
+
 ### 💡 Anwendungsmöglichkeiten
 
 Dieses Projekt dient als Grundlage für verschiedene Szenarien:
